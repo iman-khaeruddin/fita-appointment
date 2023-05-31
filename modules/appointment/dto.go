@@ -1,26 +1,29 @@
 package appointment
 
-import "time"
-
 type CreateAppointment struct {
-	UserID   int       `json:"userId"`
-	CoachID  int       `json:"coachId"`
-	Timezone int       `json:"timezone"`
-	Date     time.Time `json:"date"`
+	UserID  uint   `json:"userId" binding:"required"`
+	CoachID uint   `json:"coachId" binding:"required"`
+	Date    string `json:"date"`
 }
 
 type CoachDeclineAppointment struct {
-	CoachID       int `json:"coachId"`
-	AppointmentID int `json:"appointmentId"`
+	CoachID       uint `json:"coachId"`
+	AppointmentID uint `json:"appointmentId"`
 }
 
 type CoachRescheduleAppointment struct {
-	CoachID       int       `json:"coachId"`
-	AppointmentID int       `json:"appointmentId"`
-	NewDate       time.Time `json:"newDate"`
+	CoachID       uint   `json:"coachId"`
+	AppointmentID uint   `json:"appointmentId"`
+	NewDate       string `json:"newDate"`
 }
 
 type UserDeclineAppointment struct {
-	UserID        int `json:"coachId"`
-	AppointmentID int `json:"appointmentId"`
+	UserID        uint `json:"coachId"`
+	AppointmentID uint `json:"appointmentId"`
+}
+
+type ResponseMeta struct {
+	Success      bool   `json:"success"`
+	MessageTitle string `json:"messageTitle"`
+	Message      string `json:"message"`
 }
