@@ -25,6 +25,7 @@ type UseCaseInterface interface {
 }
 
 func (u UseCase) CreateAppointment(ctx context.Context, request CreateAppointment) ResponseMeta {
+	// validate date format
 	date, err := time.Parse("2006-01-02T15:04:05Z0700", request.Date)
 	if err != nil {
 		return ResponseMeta{
@@ -34,6 +35,7 @@ func (u UseCase) CreateAppointment(ctx context.Context, request CreateAppointmen
 		}
 	}
 
+	// find coach
 	coach, err := u.coachRepo.FindByID(ctx, request.CoachID)
 	if err != nil {
 		return ResponseMeta{
@@ -43,12 +45,14 @@ func (u UseCase) CreateAppointment(ctx context.Context, request CreateAppointmen
 		}
 	}
 
+	// convert date to coach timezone
 	dateUTC := date.In(time.UTC)
 	coachDate := dateUTC.Add(time.Duration(coach.Timezone) * time.Hour)
 	fmt.Println("payload date :", request.Date)
 	fmt.Println("date UTC :", dateUTC)
 	fmt.Println("coach datetime :", coachDate)
 
+	// validate coach availability #1
 	err = u.coachScheduleRepo.FindAvailableCoach(ctx, request.CoachID, coachDate)
 	if err != nil {
 		return ResponseMeta{
@@ -58,6 +62,7 @@ func (u UseCase) CreateAppointment(ctx context.Context, request CreateAppointmen
 		}
 	}
 
+	// validate coach availability #2
 	err = u.userAppointmentRepo.FindByCoachIDAndAppointmentDate(ctx, request.CoachID, dateUTC)
 	if err != nil {
 		return ResponseMeta{
@@ -67,6 +72,7 @@ func (u UseCase) CreateAppointment(ctx context.Context, request CreateAppointmen
 		}
 	}
 
+	// store appointment
 	userAppointment := &entity.UserAppointment{
 		CoachID:             request.CoachID,
 		UserID:              request.UserID,
